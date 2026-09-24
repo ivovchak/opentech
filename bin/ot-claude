@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Claude Code using the separate account
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export CLAUDE_CONFIG_DIR="$OT_HOME/claude"
+exec claude "$@"

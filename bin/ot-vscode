@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Separate VS Code instance with the dedicated Claude account
+set -e
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export CLAUDE_CONFIG_DIR="$OT_HOME/claude"
+
+CODE=""
+for c in \
+  "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
+  "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"; do
+  if [ -x "$c" ]; then CODE="$c"; break; fi
+done
+if [ -z "$CODE" ] && command -v code >/dev/null 2>&1; then CODE="$(command -v code)"; fi
+if [ -z "$CODE" ]; then
+  echo "VS Code not found. Install it from https://code.visualstudio.com" >&2
+  exit 1
+fi
+
+exec "$CODE" \
+  --user-data-dir "$OT_HOME/vscode/data" \
+  --extensions-dir "$OT_HOME/vscode/extensions" \
+  "$@"

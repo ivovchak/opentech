@@ -1,0 +1,5 @@
+# Logins and personal data - NEVER commit
+claude/
+vscode/
+*.log
+.DS_Store
