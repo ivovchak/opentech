@@ -1,4 +1,4 @@
-﻿# Separate Claude Code + VS Code for Windows
+﻿# Isolated Claude Code + VS Code profile for Windows
 # Run: double-click install.cmd
 #      or: powershell -ExecutionPolicy Bypass -File install.ps1
 
@@ -10,7 +10,7 @@ $ExtDir    = Join-Path $OT 'vscode\extensions'
 $BinDir    = Join-Path $OT 'bin'
 
 Write-Host ""
-Write-Host "Installing separate tools to $OT" -ForegroundColor Cyan
+Write-Host "Installing the isolated profile to $OT" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Directories

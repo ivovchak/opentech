@@ -1,4 +1,4 @@
-# Separate Claude Code and VS Code
+# Isolated Claude Code and VS Code profile
 
 This repository configures a separate Claude Code account so it does not mix with your personal account.
 

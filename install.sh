@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Separate Claude Code + VS Code for macOS / Linux
+# Isolated Claude Code + VS Code profile for macOS / Linux
 # Run: bash install.sh
 set -euo pipefail
 
@@ -7,7 +7,7 @@ OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN="$OT_HOME/bin"
 warn() { printf '\033[33m[!] %s\033[0m\n' "$*"; }
 
-printf '\n\033[36mInstalling separate tools to %s\033[0m\n\n' "$OT_HOME"
+printf '\n\033[36mInstalling the isolated profile to %s\033[0m\n\n' "$OT_HOME"
 
 # 1. Directories and permissions
 mkdir -p "$OT_HOME/claude" "$OT_HOME/vscode/data/User" "$OT_HOME/vscode/extensions"
