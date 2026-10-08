@@ -83,7 +83,24 @@ The `claude/` and `vscode/` directories contain your tokens and personal setting
 
 ## Uninstallation
 
-- Windows: delete `%USERPROFILE%\.opentech`, the desktop shortcut, and the `...\.opentech\bin` entry from the user PATH variable.
-- macOS / Linux: delete `~/.opentech`, the line marked `# opentech-bin` from `~/.zshrc` / `~/.bashrc`, and `~/Applications/VS Code OT.app` (macOS) or `~/.local/share/applications/ot-vscode.desktop` (Linux).
+Close VS Code OT and `ot-claude` first.
+
+### Windows
+
+```powershell
+& "$HOME\.opentech\uninstall.cmd"
+```
+
+Or double-click `uninstall.cmd` in the `.opentech` folder.
+
+### macOS / Linux
+
+```bash
+bash ~/.opentech/uninstall.sh
+```
+
+The uninstallation script removes `~/.opentech/bin` from PATH and the VS Code OT shortcut, then asks whether to delete the `.opentech` folder completely, **including the dedicated login and VS Code OT settings**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
+
+Your personal `claude` and regular VS Code are not affected.
 
 > `CLAUDE_CONFIG_DIR` is a stable but officially undocumented Claude Code variable. Use the dedicated subscription only for its intended work.
