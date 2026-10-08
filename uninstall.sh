@@ -29,8 +29,8 @@ done
 
 # 2. Launch shortcut
 case "$(uname -s)" in
-  Darwin) SHORTCUT="$HOME/Applications/VS Code OT.app" ;;
-  Linux)  SHORTCUT="$HOME/.local/share/applications/ot-vscode.desktop" ;;
+  Darwin) SHORTCUT="$HOME/Applications/ot-code.app" ;;
+  Linux)  SHORTCUT="$HOME/.local/share/applications/ot-code.desktop" ;;
   *)      SHORTCUT="" ;;
 esac
 if [ -n "$SHORTCUT" ] && [ -e "$SHORTCUT" ]; then
@@ -40,7 +40,7 @@ fi
 
 # 3. Folder with logins, settings, and this repository
 if [ "$YES" -eq 0 ] && [ -t 0 ]; then
-  warn "$OT_HOME contains the dedicated login (claude/) and VS Code OT settings (vscode/)."
+  warn "$OT_HOME contains the dedicated login (claude/) and ot-code settings (vscode/)."
   read -r -p "Delete $OT_HOME completely? [y/N] " answer
   case "$answer" in [yY]*) YES=1 ;; esac
 fi

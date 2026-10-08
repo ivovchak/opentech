@@ -3,7 +3,7 @@
 This repository configures a separate Claude Code account so it does not mix with your personal account.
 
 - `ot-claude` — Claude Code using the dedicated account (the regular `claude` command remains personal)
-- **VS Code OT** — a separate VS Code instance with its own settings, extensions, and login (your regular VS Code is unaffected)
+- `ot-code` — a separate VS Code instance with its own settings, extensions, and login (your regular VS Code is unaffected)
 
 The dedicated login is stored in `~/.opentech/claude`; the personal login remains in the standard `~/.claude`.
 
@@ -35,10 +35,10 @@ bash ~/.opentech/install.sh
 The installation script:
 
 1. creates the `claude/` and `vscode/` directories;
-2. adds `~/.opentech/bin` to PATH (the `ot-claude` and `ot-vscode` commands);
+2. adds `~/.opentech/bin` to PATH (the `ot-claude` and `ot-code` commands);
 3. creates dedicated VS Code settings (a blue title bar and status bar, with `[OT]` in the window title);
 4. installs the Claude Code extension in the dedicated VS Code instance;
-5. creates a VS Code OT shortcut (Windows: desktop, macOS: `~/Applications`, Linux: applications menu).
+5. creates an `ot-code` shortcut (Windows: desktop, macOS: `~/Applications`, Linux: applications menu).
 
 You can run the script again; it does not overwrite existing settings.
 
@@ -54,11 +54,11 @@ You can run the script again; it does not overwrite existing settings.
 
 | What | How |
 | --- | --- |
-| Dedicated projects | the VS Code OT shortcut or `ot-vscode <folder>` |
+| Dedicated projects | the `ot-code` shortcut or `ot-code <folder>` |
 | Dedicated Claude in the terminal | `ot-claude` |
 | Personal projects | regular VS Code and `claude` |
 
-Open dedicated projects **only** through VS Code OT; the regular VS Code shortcut uses your personal account.
+Open dedicated projects **only** through `ot-code`; the regular VS Code shortcut uses your personal account.
 
 ## Updates
 
@@ -77,13 +77,13 @@ The `claude/` and `vscode/` directories contain your tokens and personal setting
 | Symptom | What to do |
 | --- | --- |
 | `ot-claude` not found | open a new terminal; on Windows, check that `%USERPROFILE%\.opentech\bin` is in PATH |
-| VS Code OT asks for login every time | launch it only through the shortcut or `ot-vscode`; in the VS Code terminal, `echo $env:CLAUDE_CONFIG_DIR` (Windows) or `echo $CLAUDE_CONFIG_DIR` should show `.opentech/claude` |
+| `ot-code` asks for login every time | launch it only through the shortcut or `ot-code`; in the VS Code terminal, `echo $env:CLAUDE_CONFIG_DIR` (Windows) or `echo $CLAUDE_CONFIG_DIR` should show `.opentech/claude` |
 | Both VS Code instances use the same account | make sure `CLAUDE_CONFIG_DIR` is not set globally on the system |
 | Unwanted global instructions in context | do not keep instructions in `~/.claude/CLAUDE.md`; put `CLAUDE.md` in the project root |
 
 ## Uninstallation
 
-Close VS Code OT and `ot-claude` first.
+Close `ot-code` and `ot-claude` first.
 
 ### Windows
 
@@ -99,7 +99,7 @@ Or double-click `uninstall.cmd` in the `.opentech` folder.
 bash ~/.opentech/uninstall.sh
 ```
 
-The uninstallation script removes `~/.opentech/bin` from PATH and the VS Code OT shortcut, then asks whether to delete the `.opentech` folder completely, **including the dedicated login and VS Code OT settings**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
+The uninstallation script removes `~/.opentech/bin` from PATH and the `ot-code` shortcut, then asks whether to delete the `.opentech` folder completely, **including the dedicated login and `ot-code` settings**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
 
 Your personal `claude` and regular VS Code are not affected.
 
