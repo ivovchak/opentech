@@ -52,9 +52,9 @@ fi
 case "$(uname -s)" in
   Darwin)
     mkdir -p "$HOME/Applications"
-    if osacompile -o "$HOME/Applications/ot-code.app" \
+    if osacompile -o "$HOME/Applications/VS Code OpenTech.app" \
          -e "do shell script quoted form of \"$BIN/ot-code\" & \" > /dev/null 2>&1 &\"" 2>/dev/null; then
-      echo "[+] ot-code app created in ~/Applications"
+      echo "[+] VS Code OpenTech app created in ~/Applications"
     else
       warn "Could not create the shortcut; launch with: ot-code"
     fi
@@ -65,14 +65,14 @@ case "$(uname -s)" in
     cat > "$APPS/ot-code.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-  Name=ot-code
+  Name=VS Code OpenTech
   Comment=VS Code with the dedicated Claude account
 Exec="$BIN/ot-code" %F
 Icon=vscode
 Terminal=false
 Categories=Development;IDE;
 EOF
-    echo "[+] ot-code shortcut added to the applications menu"
+    echo "[+] VS Code OpenTech shortcut added to the applications menu"
     ;;
 esac
 
@@ -84,5 +84,5 @@ fi
 printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"
-echo "  3. Open dedicated projects with the ot-code command or shortcut"
+echo "  3. Open dedicated projects with the VS Code OpenTech shortcut or the ot-code command"
 echo

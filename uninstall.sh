@@ -29,7 +29,7 @@ done
 
 # 2. Launch shortcut
 case "$(uname -s)" in
-  Darwin) SHORTCUT="$HOME/Applications/ot-code.app" ;;
+  Darwin) SHORTCUT="$HOME/Applications/VS Code OpenTech.app" ;;
   Linux)  SHORTCUT="$HOME/.local/share/applications/ot-code.desktop" ;;
   *)      SHORTCUT="" ;;
 esac

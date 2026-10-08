@@ -26,10 +26,10 @@ if ($parts -contains $BinDir) {
 }
 
 # 2. Desktop shortcut
-$lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'ot-code.lnk'
+$lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'VS Code OpenTech.lnk'
 if (Test-Path $lnkPath) {
     Remove-Item -Force $lnkPath
-    Write-Host "[-] Removed the ot-code desktop shortcut"
+    Write-Host "[-] Removed the VS Code OpenTech desktop shortcut"
 }
 
 # 3. Folder with logins, settings, and this repository
