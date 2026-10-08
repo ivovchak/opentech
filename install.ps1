@@ -59,16 +59,16 @@ if ($VsDir) {
 
 # 5. Desktop shortcut
 $desktop = [Environment]::GetFolderPath('Desktop')
-$lnkPath = Join-Path $desktop 'VS Code OT.lnk'
+$lnkPath = Join-Path $desktop 'ot-code.lnk'
 $shell   = New-Object -ComObject WScript.Shell
 $lnk     = $shell.CreateShortcut($lnkPath)
-$lnk.TargetPath       = Join-Path $BinDir 'ot-vscode.cmd'
+$lnk.TargetPath       = Join-Path $BinDir 'ot-code.cmd'
 $lnk.WorkingDirectory = $OT
 $lnk.WindowStyle      = 7
 $lnk.Description      = 'VS Code with the dedicated Claude account'
 if ($VsDir) { $lnk.IconLocation = (Join-Path $VsDir 'Code.exe') + ',0' }
 $lnk.Save()
-Write-Host "[+] VS Code OT shortcut created on the desktop"
+Write-Host "[+] ot-code shortcut created on the desktop"
 
 # 6. Claude Code CLI
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
@@ -79,5 +79,5 @@ Write-Host ""
 Write-Host "Done! Next steps:" -ForegroundColor Green
 Write-Host "  1. Open a NEW terminal and run: ot-claude"
 Write-Host "  2. Sign in with the dedicated account and verify with /status"
-Write-Host "  3. Open dedicated projects only through the VS Code OT shortcut"
+Write-Host "  3. Open dedicated projects only through the ot-code shortcut"
 Write-Host ""

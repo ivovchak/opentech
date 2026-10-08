@@ -11,7 +11,7 @@ printf '\n\033[36mInstalling separate tools to %s\033[0m\n\n' "$OT_HOME"
 
 # 1. Directories and permissions
 mkdir -p "$OT_HOME/claude" "$OT_HOME/vscode/data/User" "$OT_HOME/vscode/extensions"
-chmod +x "$BIN/ot-claude" "$BIN/ot-vscode"
+chmod +x "$BIN/ot-claude" "$BIN/ot-code"
 echo "[+] claude/ and vscode/ directories are ready"
 
 # 2. Add bin to PATH (so the ot-claude command works)
@@ -42,7 +42,7 @@ fi
 
 # 4. Claude Code extension
 echo "[..] Installing the Claude Code extension in the dedicated VS Code instance"
-if "$BIN/ot-vscode" --install-extension anthropic.claude-code --force; then
+if "$BIN/ot-code" --install-extension anthropic.claude-code --force; then
   echo "[+] Extension installed"
 else
   warn "Could not install the extension (is VS Code installed?). Run install.sh again later."
@@ -52,27 +52,27 @@ fi
 case "$(uname -s)" in
   Darwin)
     mkdir -p "$HOME/Applications"
-    if osacompile -o "$HOME/Applications/VS Code OT.app" \
-         -e "do shell script quoted form of \"$BIN/ot-vscode\" & \" > /dev/null 2>&1 &\"" 2>/dev/null; then
-      echo "[+] VS Code OT app created in ~/Applications"
+    if osacompile -o "$HOME/Applications/ot-code.app" \
+         -e "do shell script quoted form of \"$BIN/ot-code\" & \" > /dev/null 2>&1 &\"" 2>/dev/null; then
+      echo "[+] ot-code app created in ~/Applications"
     else
-      warn "Could not create the shortcut; launch with: ot-vscode"
+      warn "Could not create the shortcut; launch with: ot-code"
     fi
     ;;
   Linux)
     APPS="$HOME/.local/share/applications"
     mkdir -p "$APPS"
-    cat > "$APPS/ot-vscode.desktop" <<EOF
+    cat > "$APPS/ot-code.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-  Name=VS Code OT
+  Name=ot-code
   Comment=VS Code with the dedicated Claude account
-Exec="$BIN/ot-vscode" %F
+Exec="$BIN/ot-code" %F
 Icon=vscode
 Terminal=false
 Categories=Development;IDE;
 EOF
-    echo "[+] VS Code OT shortcut added to the applications menu"
+    echo "[+] ot-code shortcut added to the applications menu"
     ;;
 esac
 
@@ -84,5 +84,5 @@ fi
 printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"
-echo "  3. Open dedicated projects through VS Code OT (or the ot-vscode command)"
+echo "  3. Open dedicated projects with the ot-code command or shortcut"
 echo

@@ -26,15 +26,15 @@ if ($parts -contains $BinDir) {
 }
 
 # 2. Desktop shortcut
-$lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'VS Code OT.lnk'
+$lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'ot-code.lnk'
 if (Test-Path $lnkPath) {
     Remove-Item -Force $lnkPath
-    Write-Host "[-] Removed the VS Code OT desktop shortcut"
+    Write-Host "[-] Removed the ot-code desktop shortcut"
 }
 
 # 3. Folder with logins, settings, and this repository
 if (-not $Yes) {
-    Write-Warning "$OT contains the dedicated login (claude\) and VS Code OT settings (vscode\)."
+    Write-Warning "$OT contains the dedicated login (claude\) and ot-code settings (vscode\)."
     $answer = Read-Host "Delete $OT completely? [y/N]"
     $Yes = $answer -match '^[yY]'
 }
@@ -44,7 +44,7 @@ if ($Yes) {
         Remove-Item -Recurse -Force $OT
         Write-Host "[-] Removed $OT"
     } catch {
-        Write-Warning "Could not delete $OT completely. Close VS Code OT and ot-claude, then delete the folder manually."
+        Write-Warning "Could not delete $OT completely. Close ot-code and ot-claude, then delete the folder manually."
     }
 } else {
     Write-Host "[=] Kept $OT (delete it manually if no longer needed)"
