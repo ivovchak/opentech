@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remove separate Claude Code + VS Code for macOS / Linux
+# Remove the isolated Claude Code + VS Code profile for macOS / Linux
 # Run: bash uninstall.sh [--yes]
 #   --yes  also delete the folder with logins and settings without asking
 set -euo pipefail
@@ -10,7 +10,7 @@ warn() { printf '\033[33m[!] %s\033[0m\n' "$*"; }
 YES=0
 [ "${1:-}" = "--yes" ] && YES=1
 
-printf '\n\033[36mRemoving separate tools from %s\033[0m\n\n' "$OT_HOME"
+printf '\n\033[36mRemoving the isolated profile from %s\033[0m\n\n' "$OT_HOME"
 
 # 1. Remove bin from PATH
 MARK="# opentech-bin"

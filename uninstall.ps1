@@ -1,4 +1,4 @@
-# Remove separate Claude Code + VS Code for Windows
+# Remove the isolated Claude Code + VS Code profile for Windows
 # Run: double-click uninstall.cmd
 #      or: powershell -ExecutionPolicy Bypass -File uninstall.ps1 [-Yes]
 #   -Yes  also delete the folder with logins and settings without asking
@@ -10,7 +10,7 @@ $OT     = $PSScriptRoot
 $BinDir = Join-Path $OT 'bin'
 
 Write-Host ""
-Write-Host "Removing separate tools from $OT" -ForegroundColor Cyan
+Write-Host "Removing the isolated profile from $OT" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Remove bin from the user PATH
