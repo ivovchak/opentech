@@ -2,7 +2,7 @@
   "terminal.integrated.env.windows": { "CLAUDE_CONFIG_DIR": "__CLAUDE_CONFIG_DIR__" },
   "terminal.integrated.env.osx": { "CLAUDE_CONFIG_DIR": "__CLAUDE_CONFIG_DIR__" },
   "terminal.integrated.env.linux": { "CLAUDE_CONFIG_DIR": "__CLAUDE_CONFIG_DIR__" },
-  "window.title": "[OT] ${activeEditorShort}${separator}${rootName}",
+  "window.title": "[OpenTech] ${activeEditorShort}${separator}${rootName}",
   "workbench.colorCustomizations": {
     "titleBar.activeBackground": "#1f6feb",
     "titleBar.activeForeground": "#ffffff",

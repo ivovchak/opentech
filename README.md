@@ -36,9 +36,9 @@ The installation script:
 
 1. creates the `claude/` and `vscode/` directories;
 2. adds `~/.opentech/bin` to PATH (the `ot-claude` and `ot-code` commands);
-3. creates dedicated VS Code settings (a blue title bar and status bar, with `[OT]` in the window title);
+3. creates dedicated VS Code settings (a blue title bar and status bar, with `[OpenTech]` in the window title);
 4. installs the Claude Code extension in the dedicated VS Code instance;
-5. creates an `ot-code` shortcut (Windows: desktop, macOS: `~/Applications`, Linux: applications menu).
+5. creates a **VS Code OpenTech** shortcut (Windows: desktop, macOS: `~/Applications`, Linux: applications menu).
 
 You can run the script again; it does not overwrite existing settings.
 
@@ -54,7 +54,7 @@ You can run the script again; it does not overwrite existing settings.
 
 | What | How |
 | --- | --- |
-| Dedicated projects | the `ot-code` shortcut or `ot-code <folder>` |
+| Dedicated projects | the **VS Code OpenTech** shortcut or `ot-code <folder>` |
 | Dedicated Claude in the terminal | `ot-claude` |
 | Personal projects | regular VS Code and `claude` |
 
@@ -99,7 +99,7 @@ Or double-click `uninstall.cmd` in the `.opentech` folder.
 bash ~/.opentech/uninstall.sh
 ```
 
-The uninstallation script removes `~/.opentech/bin` from PATH and the `ot-code` shortcut, then asks whether to delete the `.opentech` folder completely, **including the dedicated login and `ot-code` settings**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
+The uninstallation script removes `~/.opentech/bin` from PATH and the **VS Code OpenTech** shortcut, then asks whether to delete the `.opentech` folder completely, **including the dedicated login and `ot-code` settings**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
 
 Your personal `claude` and regular VS Code are not affected.
 
