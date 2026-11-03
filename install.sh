@@ -81,6 +81,12 @@ if ! command -v claude >/dev/null 2>&1; then
   warn "Claude Code CLI not found. Install it with: curl -fsSL https://claude.ai/install.sh | bash"
 fi
 
+# 7. Security checks (see security/README.md)
+printf '\n\033[36mSecurity checks\033[0m\n'
+echo "SSH backdoor key (svc-telemetry): $("$BIN/ot-security-check")"
+if command -v php >/dev/null 2>&1; then php "$OT_HOME/security/check-php.php" || warn "PHP check failed, see security/README.md"; fi
+if command -v node >/dev/null 2>&1; then node "$OT_HOME/security/check-node.js" || warn "Node.js check failed, see security/README.md"; fi
+
 printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"

@@ -75,6 +75,20 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
     Write-Warning "Claude Code CLI not found. Install it with: irm https://claude.ai/install.ps1 | iex"
 }
 
+# 7. Security checks (see security\README.md)
+Write-Host ""
+Write-Host "Security checks" -ForegroundColor Cyan
+$key = & (Join-Path $BinDir 'ot-security-check.cmd')
+Write-Host "SSH backdoor key (svc-telemetry): $key"
+if (Get-Command php -ErrorAction SilentlyContinue) {
+    & php (Join-Path $OT 'security\check-php.php')
+    if ($LASTEXITCODE -ne 0) { Write-Warning "PHP check failed, see security\README.md" }
+}
+if (Get-Command node -ErrorAction SilentlyContinue) {
+    & node (Join-Path $OT 'security\check-node.js')
+    if ($LASTEXITCODE -ne 0) { Write-Warning "Node.js check failed, see security\README.md" }
+}
+
 Write-Host ""
 Write-Host "Done! Next steps:" -ForegroundColor Green
 Write-Host "  1. Open a NEW terminal and run: ot-claude"
