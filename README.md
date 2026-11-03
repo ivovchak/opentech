@@ -72,6 +72,14 @@ Logins and settings (`claude/`, `vscode/`) are not changed.
 
 The `claude/` and `vscode/` directories contain your tokens and personal settings. They are listed in `.gitignore`; **never commit them** or remove those entries from `.gitignore`.
 
+### Security checks
+
+[security/README.md](security/README.md) describes the known incidents and how to check your machine and servers:
+
+- critical PHP RCE of October 2026 (CVE-2026-109618, CVE-2026-109619): `php ~/.opentech/security/check-php.php`;
+- Node.js security release of October 2026, including the Brotli RCE (CVE-2026-111497): `node ~/.opentech/security/check-node.js`;
+- backdoored Claude Code extension in the Cursor marketplace: `ot-security-check`.
+
 ## Troubleshooting
 
 | Symptom | What to do |
