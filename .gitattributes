@@ -2,5 +2,10 @@
 *.sh text eol=lf
 bin/ot-claude text eol=lf
 bin/ot-code text eol=lf
+bin/ot-security-check text eol=lf
+bin/ot-security-check.js text eol=lf
+bin/ot-security-check.php text eol=lf
+security/*.js text eol=lf
+security/*.php text eol=lf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf

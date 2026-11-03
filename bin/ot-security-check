@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Check for the svc-telemetry SSH key planted by the compromised Claude Code extension in the Cursor marketplace
+# Details and cleanup scripts: https://cursor.com/blog/claude-code-extension-security-notice
+grep -qs svc-telemetry ~/.ssh/authorized_keys && echo "FOUND" || echo "clean"
