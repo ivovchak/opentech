@@ -3,4 +3,6 @@
 OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export CLAUDE_CONFIG_DIR="$OT_HOME/claude"
 unset ANTHROPIC_API_KEY
-exec claude "$@"
+export OT_HOME
+# Blue "OpenTech" badge in the status line (see bin/ot-statusline)
+exec claude --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"
