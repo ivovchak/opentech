@@ -56,9 +56,56 @@ You can run the script again; it does not overwrite existing settings.
 | --- | --- |
 | Dedicated projects | the **VS Code OpenTech** shortcut or `ot-code <folder>` |
 | Dedicated Claude in the terminal | `ot-claude` |
+| Claude billed to the API key | `ot-claude-api` |
 | Personal projects | regular VS Code and `claude` |
 
 Open dedicated projects **only** through `ot-code`; the regular VS Code shortcut uses your personal account.
+
+## API key mode
+
+`ot-claude-api` runs Claude Code billed to an Anthropic API key (pay per token) instead of the subscription. It uses its own config directory, `~/.opentech/claude-api`, so it never mixes with the subscription login.
+
+Create a key in the [Claude Console](https://console.anthropic.com) and save it locally:
+
+```bash
+printf '%s' 'sk-ant-...' > ~/.opentech/anthropic-api-key && chmod 600 ~/.opentech/anthropic-api-key
+```
+
+```powershell
+Set-Content -NoNewline "$HOME\.opentech\anthropic-api-key" 'sk-ant-...'
+```
+
+Alternatively, set `OT_ANTHROPIC_API_KEY` for the current shell. Run `/status` in the session to confirm that it uses the API key, and set a spend limit in the Console.
+
+`anthropic-api-key` and `claude-api/` are listed in `.gitignore`; **never commit them**. If the key leaks, revoke it in the Console immediately.
+
+`ot-claude` always uses the subscription, even if `ANTHROPIC_API_KEY` is set globally.
+
+### Example: unattended automation
+
+The interactive `ot-claude-api` session waits for your answers and permission prompts. For automation, run it in headless mode (`-p`): it completes the task and exits without asking anything.
+
+```bash
+ot-claude-api -p "Process every file in docs/ according to PLAN.md and save the results to out/" \
+  --max-turns 50 \
+  --allowedTools "Read,Write,Edit,Glob,Grep" \
+  --output-format json > run.log
+```
+
+- `-p` runs non-interactively and exits when done;
+- `--allowedTools` allows only the listed tools; without it, the run stops at the first permission prompt;
+- `--max-turns` caps the number of agent steps so a run cannot loop forever;
+- `run.log` contains the result and the cost of the run.
+
+Things to keep in mind:
+
+- **No subscription time limits**, but you pay per token; set a spend limit in the Console.
+- **API rate limits** depend on your account tier; a new account has low limits, so large runs may slow down or hit `429` errors. See [Rate limits](https://platform.claude.com/docs/en/api/rate-limits).
+- **The computer must stay awake** for the whole run.
+- **Test on 2-3 files first** and check the cost in `run.log` before processing everything.
+- For hundreds of documents where results are not needed immediately, a script using the [Batch API](https://platform.claude.com/docs/en/build-with-claude/batch-processing) (50% discount) is cheaper than an agent session.
+
+More details: [Run Claude Code programmatically](https://code.claude.com/docs/en/headless), [Permission modes](https://code.claude.com/docs/en/permission-modes), [Pricing](https://platform.claude.com/docs/en/about-claude/pricing).
 
 ## Updates
 
@@ -70,7 +117,7 @@ Logins and settings (`claude/`, `vscode/`) are not changed.
 
 ## Security
 
-The `claude/` and `vscode/` directories contain your tokens and personal settings. They are listed in `.gitignore`; **never commit them** or remove those entries from `.gitignore`.
+The `claude/`, `claude-api/` and `vscode/` directories and the `anthropic-api-key` file contain your tokens and personal settings. They are listed in `.gitignore`; **never commit them** or remove those entries from `.gitignore`.
 
 ### Security checks
 

@@ -5,6 +5,7 @@
 $ErrorActionPreference = 'Stop'
 $OT        = $PSScriptRoot
 $ClaudeDir = Join-Path $OT 'claude'
+$ClaudeApiDir = Join-Path $OT 'claude-api'
 $DataDir   = Join-Path $OT 'vscode\data'
 $ExtDir    = Join-Path $OT 'vscode\extensions'
 $BinDir    = Join-Path $OT 'bin'
@@ -14,10 +15,10 @@ Write-Host "Installing the isolated profile to $OT" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Directories
-foreach ($d in @($ClaudeDir, (Join-Path $DataDir 'User'), $ExtDir)) {
+foreach ($d in @($ClaudeDir, $ClaudeApiDir, (Join-Path $DataDir 'User'), $ExtDir)) {
     New-Item -ItemType Directory -Force -Path $d | Out-Null
 }
-Write-Host "[+] claude\ and vscode\ directories are ready"
+Write-Host "[+] claude\, claude-api\ and vscode\ directories are ready"
 
 # 2. Add bin to the user PATH (so the ot-claude command works)
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
