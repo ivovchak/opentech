@@ -1,5 +1,7 @@
 # Logins and personal data - NEVER commit
 claude/
+claude-api/
+anthropic-api-key
 vscode/
 *.log
 .DS_Store
