@@ -11,7 +11,7 @@ printf '\n\033[36mInstalling the isolated profile to %s\033[0m\n\n' "$OT_HOME"
 
 # 1. Directories and permissions
 mkdir -p "$OT_HOME/claude" "$OT_HOME/claude-api" "$OT_HOME/vscode/data/User" "$OT_HOME/vscode/extensions"
-chmod +x "$BIN/ot-claude" "$BIN/ot-claude-api" "$BIN/ot-code" "$BIN/ot-security-check" "$BIN/ot-security-check.js" "$BIN/ot-security-check.php"
+chmod +x "$BIN/ot-claude" "$BIN/ot-claude-api" "$BIN/ot-code" "$BIN/ot-statusline" "$BIN/ot-security-check" "$BIN/ot-security-check.js" "$BIN/ot-security-check.php"
 echo "[+] claude/, claude-api/ and vscode/ directories are ready"
 [ -f "$OT_HOME/anthropic-api-key" ] && chmod 600 "$OT_HOME/anthropic-api-key"
 

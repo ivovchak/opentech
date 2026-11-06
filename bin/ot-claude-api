@@ -16,4 +16,6 @@ fi
 
 export CLAUDE_CONFIG_DIR="$OT_HOME/claude-api"
 export ANTHROPIC_API_KEY="$KEY"
-exec claude "$@"
+export OT_HOME
+# Yellow "OpenTech API" badge in the status line (see bin/ot-statusline)
+exec claude --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"

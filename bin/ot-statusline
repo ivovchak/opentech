@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Claude Code status line for ot-claude and ot-claude-api.
+# Shows a coloured badge so it is obvious which account the session uses:
+#   blue   " OpenTech "     - ot-claude (subscription)
+#   yellow " OpenTech API " - ot-claude-api (pay per token)
+# Claude Code passes session info as JSON on stdin; model and folder are shown if jq is installed.
+input="$(cat)"
+
+case "$(basename "${CLAUDE_CONFIG_DIR:-}")" in
+  claude-api) badge=' OpenTech API '; color='1;30;43' ;;
+  *)          badge=' OpenTech ';     color='1;97;44' ;;
+esac
+
+info=""
+if command -v jq >/dev/null 2>&1; then
+  info="$(printf '%s' "$input" | jq -r '
+    [ .model.display_name,
+      ((.workspace.current_dir // .cwd // "") | split("/") | last) ]
+    | map(select(. != null and . != "")) | join(" · ")' 2>/dev/null)"
+fi
+
+printf '\033[%sm%s\033[0m %s' "$color" "$badge" "$info"
