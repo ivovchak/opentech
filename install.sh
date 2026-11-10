@@ -7,12 +7,35 @@ OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN="$OT_HOME/bin"
 warn() { printf '\033[33m[!] %s\033[0m\n' "$*"; }
 
-printf '\n\033[36mInstalling the isolated profile to %s\033[0m\n\n' "$OT_HOME"
+P="$OT_HOME/profiles"
+VERSION="$(cat "$OT_HOME/VERSION" 2>/dev/null || echo unknown)"
+
+printf '\n\033[36mInstalling OpenTech %s to %s\033[0m\n\n' "$VERSION" "$OT_HOME"
+
+# 0. Migrations: one-time changes to existing data (see migrations/ and CHANGELOG.md).
+# Applied migration names are recorded in profiles/.migrations so each runs only once.
+mkdir -p "$P"
+APPLIED="$P/.migrations"
+touch "$APPLIED"
+for m in "$OT_HOME"/migrations/[0-9]*.sh; do
+  [ -f "$m" ] || continue
+  name="$(basename "$m" .sh)"
+  grep -qxF "$name" "$APPLIED" && continue
+  echo "[..] Migration $name"
+  if bash "$m" "$OT_HOME"; then
+    echo "$name" >> "$APPLIED"
+    echo "[+] Migration $name applied"
+  else
+    warn "Migration $name failed. Fix the problem above and run install.sh again."
+    exit 1
+  fi
+done
 
 # 1. Directories and permissions
-mkdir -p "$OT_HOME/claude" "$OT_HOME/claude-api" "$OT_HOME/vscode/data/User" "$OT_HOME/vscode/extensions"
-chmod +x "$BIN/ot-claude" "$BIN/ot-claude-api" "$BIN/ot-code" "$BIN/ot-statusline" "$BIN/ot-security-check" "$BIN/ot-security-check.js" "$BIN/ot-security-check.php"
-echo "[+] claude/, claude-api/ and vscode/ directories are ready"
+mkdir -p "$P/claude-code" "$P/claude-code-api" "$P/claude-desktop" "$P/vscode/data/User" "$P/vscode/extensions"
+chmod 700 "$P"
+chmod +x "$BIN"/ot-* "$OT_HOME"/migrations/*.sh
+echo "[+] profiles/ (claude-code, claude-code-api, claude-desktop, vscode) is ready"
 [ -f "$OT_HOME/anthropic-api-key" ] && chmod 600 "$OT_HOME/anthropic-api-key"
 
 # 2. Add bin to PATH (so the ot-claude command works)
@@ -33,9 +56,9 @@ for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
 done
 
 # 3. Dedicated VS Code configuration
-SETTINGS="$OT_HOME/vscode/data/User/settings.json"
+SETTINGS="$P/vscode/data/User/settings.json"
 if [ ! -f "$SETTINGS" ]; then
-  sed "s|__CLAUDE_CONFIG_DIR__|$OT_HOME/claude|g" "$OT_HOME/templates/settings.json" > "$SETTINGS"
+  sed "s|__CLAUDE_CONFIG_DIR__|$P/claude-code|g" "$OT_HOME/templates/settings.json" > "$SETTINGS"
   echo "[+] Created settings.json for the dedicated VS Code instance"
 else
   echo "[=] settings.json already exists; leaving it unchanged"
@@ -49,15 +72,36 @@ else
   warn "Could not install the extension (is VS Code installed?). Run install.sh again later."
 fi
 
-# 5. Launch shortcut
+# 5. Launch shortcuts
+# make_app NAME COMMAND [ICON]: a small ~/Applications/NAME.app that runs COMMAND
+make_app() {
+  local app="$HOME/Applications/$1.app"
+  rm -rf "$app"
+  osacompile -o "$app" -e "do shell script quoted form of \"$2\" & \" > /dev/null 2>&1 &\"" 2>/dev/null || return 1
+  if [ -n "${3:-}" ] && [ -f "$3" ]; then
+    cp "$3" "$app/Contents/Resources/applet.icns"
+    codesign --force --sign - "$app" >/dev/null 2>&1 || true
+    touch "$app"
+  fi
+}
 case "$(uname -s)" in
   Darwin)
     mkdir -p "$HOME/Applications"
-    if osacompile -o "$HOME/Applications/VS Code OpenTech.app" \
-         -e "do shell script quoted form of \"$BIN/ot-code\" & \" > /dev/null 2>&1 &\"" 2>/dev/null; then
+    if make_app "VS Code OpenTech" "$BIN/ot-code"; then
       echo "[+] VS Code OpenTech app created in ~/Applications"
     else
       warn "Could not create the shortcut; launch with: ot-code"
+    fi
+    CLAUDE_APP=""
+    for a in "/Applications/Claude.app" "$HOME/Applications/Claude.app"; do
+      [ -d "$a" ] && CLAUDE_APP="$a" && break
+    done
+    if [ -z "$CLAUDE_APP" ]; then
+      warn "Claude desktop app not found; install it from https://claude.ai/download and run install.sh again"
+    elif make_app "Claude OpenTech" "$BIN/ot-claude-desktop" "$CLAUDE_APP/Contents/Resources/electron.icns"; then
+      echo "[+] Claude OpenTech app created in ~/Applications"
+    else
+      warn "Could not create the shortcut; launch with: ot-claude-desktop"
     fi
     ;;
   Linux)
@@ -92,4 +136,6 @@ printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"
 echo "  3. Open dedicated projects with the VS Code OpenTech shortcut or the ot-code command"
+[ "$(uname -s)" = "Darwin" ] && echo "  4. Claude desktop with the dedicated account: Claude OpenTech in ~/Applications"
+echo "  Update later with: ot-update"
 echo

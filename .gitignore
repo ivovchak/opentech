@@ -1,7 +1,9 @@
 # Logins and personal data - NEVER commit
+profiles/
+anthropic-api-key
+# Folders used before 2.0.0 (moved into profiles/ by migrations/0001-profiles)
 claude/
 claude-api/
-anthropic-api-key
 vscode/
 *.log
 .DS_Store

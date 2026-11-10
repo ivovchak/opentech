@@ -7,7 +7,7 @@
 input="$(cat)"
 
 case "$(basename "${CLAUDE_CONFIG_DIR:-}")" in
-  claude-api) badge=' OpenTech API '; color='1;30;43' ;;
+  claude-code-api) badge=' OpenTech API '; color='1;30;43' ;;
   *)          badge=' OpenTech ';     color='1;97;44' ;;
 esac
 

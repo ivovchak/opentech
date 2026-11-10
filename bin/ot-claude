@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code using the separate account (subscription)
 OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export CLAUDE_CONFIG_DIR="$OT_HOME/claude"
+export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code"
 unset ANTHROPIC_API_KEY
 export OT_HOME
 # Blue "OpenTech" badge in the status line (see bin/ot-statusline)
