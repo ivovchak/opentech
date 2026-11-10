@@ -3,16 +3,16 @@
 This repository configures a separate Claude account so it does not mix with your personal account.
 
 - `ot-claude` — Claude Code using the dedicated account (the regular `claude` command remains personal)
-- **Claude OpenTech** (`ot-claude-desktop`) — a second Claude desktop app with the dedicated account, running alongside your personal Claude (macOS and Windows)
+- **OT Claude** (`ot-claude-desktop`) — a second Claude desktop app with the dedicated account, running alongside your personal Claude (macOS and Windows)
 - `ot-code` — a separate VS Code instance with its own settings, extensions, and login (your regular VS Code is unaffected)
 
 All dedicated logins and settings are stored in `~/.opentech/profiles/`; your personal ones stay in the standard places (`~/.claude`, the regular Claude app and VS Code).
 
 | Folder | Used by |
 | --- | --- |
-| `profiles/claude-code/` | `ot-claude`, `ot-code`, and the Code tab of Claude OpenTech |
+| `profiles/claude-code/` | `ot-claude`, `ot-code`, and the Code tab of OT Claude |
 | `profiles/claude-code-api/` | `ot-claude-api` |
-| `profiles/claude-desktop/` | Claude OpenTech (chats, desktop app settings) |
+| `profiles/claude-desktop/` | OT Claude (chats, desktop app settings) |
 | `profiles/vscode/` | `ot-code` (settings and extensions) |
 
 ## Requirements
@@ -20,7 +20,7 @@ All dedicated logins and settings are stored in `~/.opentech/profiles/`; your pe
 - [Git](https://git-scm.com)
 - [VS Code](https://code.visualstudio.com)
 - [Claude Code](https://docs.claude.com/en/docs/claude-code/overview)
-- [Claude desktop](https://claude.ai/download) (optional, for Claude OpenTech; on Windows the Microsoft Store version is not supported)
+- [Claude desktop](https://claude.ai/download) (optional, for OT Claude; on Windows the Microsoft Store version is not supported)
 - A separate Claude account
 
 ## Installation
@@ -48,7 +48,7 @@ The installation script:
 3. adds `~/.opentech/bin` to PATH (the `ot-claude`, `ot-code`, `ot-claude-desktop` and `ot-update` commands);
 4. creates dedicated VS Code settings (a blue title bar and status bar, with `[OpenTech]` in the window title);
 5. installs the Claude Code extension in the dedicated VS Code instance;
-6. creates **VS Code OpenTech** and **Claude OpenTech** shortcuts (Windows: desktop, macOS: `~/Applications`, Linux: applications menu, VS Code only).
+6. creates **VS Code OpenTech** and **OT Claude** shortcuts (Windows: desktop, macOS: `~/Applications`, Linux: applications menu, VS Code only).
 
 You can run the script again; it does not overwrite existing settings.
 
@@ -66,21 +66,21 @@ You can run the script again; it does not overwrite existing settings.
 | --- | --- |
 | Dedicated projects | the **VS Code OpenTech** shortcut or `ot-code <folder>` |
 | Dedicated Claude in the terminal | `ot-claude` |
-| Dedicated Claude desktop app | the **Claude OpenTech** shortcut or `ot-claude-desktop` |
+| Dedicated Claude desktop app | the **OT Claude** shortcut or `ot-claude-desktop` |
 | Claude billed to the API key | `ot-claude-api` |
 | Personal projects | regular VS Code and `claude` |
 
 Open dedicated projects **only** through `ot-code`; the regular VS Code shortcut uses your personal account.
 
-## Claude desktop (Claude OpenTech)
+## Claude desktop (OT Claude)
 
-Claude OpenTech is the same Claude app you already have, started with its own data folder (`profiles/claude-desktop`). It does not change your personal Claude app, and both can be open at the same time.
+OT Claude is the same Claude app you already have, started with its own data folder (`profiles/claude-desktop`). It does not change your personal Claude app, and both can be open at the same time.
 
 - Sign in on first launch with the dedicated account. Use the **email code** login: after browser login (for example Google), the `claude://` link may open your personal Claude instead.
 - Its Code tab uses `profiles/claude-code`, the same login and settings as `ot-claude`.
 - In the Dock and the taskbar both copies have the same Claude icon; check the account in the app settings.
-- Clicking the shortcut again brings the running Claude OpenTech to the front instead of starting a second copy (two copies on one data folder could damage it).
-- It relies on Claude's `--user-data-dir` start option, which is not officially documented. If a Claude update stops supporting it, Claude OpenTech will open with your personal data; tell the maintainer.
+- Clicking the shortcut again brings the running OT Claude to the front instead of starting a second copy (two copies on one data folder could damage it).
+- It relies on Claude's `--user-data-dir` start option, which is not officially documented. If a Claude update stops supporting it, OT Claude will open with your personal data; tell the maintainer.
 
 ## API key mode
 
@@ -134,7 +134,7 @@ More details: [Run Claude Code programmatically](https://code.claude.com/docs/en
 ot-update
 ```
 
-It pulls the latest version and runs the install script again, which applies new migrations. Versions before 2.0.0 do not have `ot-update` yet; update them once with `cd ~/.opentech && git pull && bash install.sh` (Windows: `git pull`, then `install.cmd`). Close `ot-code`, `ot-claude` and Claude OpenTech first. Your logins and settings in `profiles/` are kept.
+It pulls the latest version and runs the install script again, which applies new migrations. Versions before 2.0.0 do not have `ot-update` yet; update them once with `cd ~/.opentech && git pull && bash install.sh` (Windows: `git pull`, then `install.cmd`). Close `ot-code`, `ot-claude` and OT Claude first. Your logins and settings in `profiles/` are kept.
 
 ## Versions and migrations
 
@@ -165,13 +165,13 @@ The `profiles/` directory and the `anthropic-api-key` file contain your tokens a
 | `ot-claude` not found | open a new terminal; on Windows, check that `%USERPROFILE%\.opentech\bin` is in PATH |
 | `ot-code` asks for login every time | launch it only through the shortcut or `ot-code`; in the VS Code terminal, `echo $env:CLAUDE_CONFIG_DIR` (Windows) or `echo $CLAUDE_CONFIG_DIR` should show `.opentech/profiles/claude-code` |
 | Both VS Code instances use the same account | make sure `CLAUDE_CONFIG_DIR` is not set globally on the system |
-| Claude OpenTech shows your personal chats | open it only through the shortcut or `ot-claude-desktop`; the regular Claude icon starts your personal copy |
+| OT Claude shows your personal chats | open it only through the shortcut or `ot-claude-desktop`; the regular Claude icon starts your personal copy |
 | Install stops at a migration | read the message above it (often a running `ot-code`), fix it, and run the install script again |
 | Unwanted global instructions in context | do not keep instructions in `~/.claude/CLAUDE.md`; put `CLAUDE.md` in the project root |
 
 ## Uninstallation
 
-Close `ot-code`, `ot-claude` and Claude OpenTech first.
+Close `ot-code`, `ot-claude` and OT Claude first.
 
 ### Windows
 
@@ -187,7 +187,7 @@ Or double-click `uninstall.cmd` in the `.opentech` folder.
 bash ~/.opentech/uninstall.sh
 ```
 
-The uninstallation script removes `~/.opentech/bin` from PATH and the **VS Code OpenTech** and **Claude OpenTech** shortcuts, then asks whether to delete the `.opentech` folder completely, **including the dedicated logins and settings in `profiles/`**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
+The uninstallation script removes `~/.opentech/bin` from PATH and the **VS Code OpenTech** and **OT Claude** shortcuts, then asks whether to delete the `.opentech` folder completely, **including the dedicated logins and settings in `profiles/`**. Answer `N` to keep them. To delete without asking, pass `--yes` (macOS / Linux) or run `uninstall.ps1 -Yes` (Windows).
 
 Your personal `claude`, Claude app and regular VS Code are not affected.
 

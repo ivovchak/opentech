@@ -95,22 +95,23 @@ $lnk.Save()
 Write-Host "[+] VS Code OpenTech shortcut created on the desktop"
 
 # 5b. Claude desktop shortcut (a second Claude with the dedicated account)
+Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $desktop 'Claude OpenTech.lnk')  # old name (2.0.0)
 $ClaudeExe = @(
     (Join-Path $env:LOCALAPPDATA 'AnthropicClaude\claude.exe'),
     (Join-Path $env:LOCALAPPDATA 'Programs\Claude\Claude.exe'),
     (Join-Path $env:ProgramFiles 'Claude\Claude.exe')
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 if ($ClaudeExe) {
-    $lnk = $shell.CreateShortcut((Join-Path $desktop 'Claude OpenTech.lnk'))
+    $lnk = $shell.CreateShortcut((Join-Path $desktop 'OT Claude.lnk'))
     $lnk.TargetPath       = Join-Path $BinDir 'ot-claude-desktop.cmd'
     $lnk.WorkingDirectory = $OT
     $lnk.WindowStyle      = 7
     $lnk.Description      = 'Claude desktop with the dedicated account'
     $lnk.IconLocation     = "$ClaudeExe,0"
     $lnk.Save()
-    Write-Host "[+] Claude OpenTech shortcut created on the desktop"
+    Write-Host "[+] OT Claude shortcut created on the desktop"
 } elseif (Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue) {
-    Write-Warning "Claude is installed from the Microsoft Store; that version cannot use a separate data folder. Install it from https://claude.ai/download to get Claude OpenTech."
+    Write-Warning "Claude is installed from the Microsoft Store; that version cannot use a separate data folder. Install it from https://claude.ai/download to get OT Claude."
 } else {
     Write-Warning "Claude desktop app not found; install it from https://claude.ai/download and run install.cmd again."
 }
@@ -139,6 +140,6 @@ Write-Host "Done! Next steps:" -ForegroundColor Green
 Write-Host "  1. Open a NEW terminal and run: ot-claude"
 Write-Host "  2. Sign in with the dedicated account and verify with /status"
 Write-Host "  3. Open dedicated projects only through the VS Code OpenTech shortcut"
-Write-Host "  4. Claude desktop with the dedicated account: the Claude OpenTech shortcut"
+Write-Host "  4. Claude desktop with the dedicated account: the OT Claude shortcut"
 Write-Host "  Update later with: ot-update"
 Write-Host ""

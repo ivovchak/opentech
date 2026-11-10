@@ -6,6 +6,10 @@ One-time changes to existing data are done by migrations in `migrations/`. The i
 new migration once, in order, and records it in `profiles/.migrations`. Every migration has a `.sh`
 (macOS / Linux) and a `.ps1` (Windows) version with the same name.
 
+## 2.0.1
+
+- The Claude desktop app with the dedicated account is now called **OT Claude** (was Claude OpenTech in 2.0.0). The install script removes the old shortcut.
+
 ## 2.0.0
 
 - **Claude desktop with the dedicated account**: `Claude OpenTech` app (macOS: `~/Applications`,

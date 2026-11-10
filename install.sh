@@ -92,14 +92,15 @@ case "$(uname -s)" in
     else
       warn "Could not create the shortcut; launch with: ot-code"
     fi
+    rm -rf "$HOME/Applications/Claude OpenTech.app"  # old name (2.0.0)
     CLAUDE_APP=""
     for a in "/Applications/Claude.app" "$HOME/Applications/Claude.app"; do
       [ -d "$a" ] && CLAUDE_APP="$a" && break
     done
     if [ -z "$CLAUDE_APP" ]; then
       warn "Claude desktop app not found; install it from https://claude.ai/download and run install.sh again"
-    elif make_app "Claude OpenTech" "$BIN/ot-claude-desktop" "$CLAUDE_APP/Contents/Resources/electron.icns"; then
-      echo "[+] Claude OpenTech app created in ~/Applications"
+    elif make_app "OT Claude" "$BIN/ot-claude-desktop" "$CLAUDE_APP/Contents/Resources/electron.icns"; then
+      echo "[+] OT Claude app created in ~/Applications"
     else
       warn "Could not create the shortcut; launch with: ot-claude-desktop"
     fi
@@ -136,6 +137,6 @@ printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"
 echo "  3. Open dedicated projects with the VS Code OpenTech shortcut or the ot-code command"
-[ "$(uname -s)" = "Darwin" ] && echo "  4. Claude desktop with the dedicated account: Claude OpenTech in ~/Applications"
+[ "$(uname -s)" = "Darwin" ] && echo "  4. Claude desktop with the dedicated account: OT Claude in ~/Applications"
 echo "  Update later with: ot-update"
 echo
