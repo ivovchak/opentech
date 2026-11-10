@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Update OpenTech: pull the latest version and re-run install.sh (which applies new migrations).
+set -euo pipefail
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+old="$(cat "$OT_HOME/VERSION" 2>/dev/null || echo unknown)"
+git -C "$OT_HOME" pull --ff-only
+new="$(cat "$OT_HOME/VERSION" 2>/dev/null || echo unknown)"
+if [ "$old" = "$new" ]; then
+  echo "OpenTech $new is up to date"
+else
+  echo "OpenTech $old -> $new (see CHANGELOG.md)"
+fi
+exec bash "$OT_HOME/install.sh"

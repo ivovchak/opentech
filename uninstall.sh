@@ -27,20 +27,22 @@ for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
   fi
 done
 
-# 2. Launch shortcut
+# 2. Launch shortcuts
 case "$(uname -s)" in
-  Darwin) SHORTCUT="$HOME/Applications/VS Code OpenTech.app" ;;
-  Linux)  SHORTCUT="$HOME/.local/share/applications/ot-code.desktop" ;;
-  *)      SHORTCUT="" ;;
+  Darwin) SHORTCUTS=("$HOME/Applications/VS Code OpenTech.app" "$HOME/Applications/Claude OpenTech.app") ;;
+  Linux)  SHORTCUTS=("$HOME/.local/share/applications/ot-code.desktop") ;;
+  *)      SHORTCUTS=() ;;
 esac
-if [ -n "$SHORTCUT" ] && [ -e "$SHORTCUT" ]; then
-  rm -rf "$SHORTCUT"
-  echo "[-] Removed $SHORTCUT"
-fi
+for s in ${SHORTCUTS[@]+"${SHORTCUTS[@]}"}; do
+  if [ -e "$s" ]; then
+    rm -rf "$s"
+    echo "[-] Removed $s"
+  fi
+done
 
 # 3. Folder with logins, settings, and this repository
 if [ "$YES" -eq 0 ] && [ -t 0 ]; then
-  warn "$OT_HOME contains the dedicated login (claude/) and ot-code settings (vscode/)."
+  warn "$OT_HOME contains the dedicated logins and settings (profiles/)."
   read -r -p "Delete $OT_HOME completely? [y/N] " answer
   case "$answer" in [yY]*) YES=1 ;; esac
 fi

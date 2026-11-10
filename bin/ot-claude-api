@@ -14,7 +14,7 @@ if [ -z "$KEY" ]; then
   exit 1
 fi
 
-export CLAUDE_CONFIG_DIR="$OT_HOME/claude-api"
+export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code-api"
 export ANTHROPIC_API_KEY="$KEY"
 export OT_HOME
 # Yellow "OpenTech API" badge in the status line (see bin/ot-statusline)

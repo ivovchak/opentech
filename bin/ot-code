@@ -2,7 +2,7 @@
 # Separate VS Code instance with the dedicated Claude account
 set -e
 OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export CLAUDE_CONFIG_DIR="$OT_HOME/claude"
+export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code"
 
 CODE=""
 for c in \
@@ -17,6 +17,6 @@ if [ -z "$CODE" ]; then
 fi
 
 exec "$CODE" \
-  --user-data-dir "$OT_HOME/vscode/data" \
-  --extensions-dir "$OT_HOME/vscode/extensions" \
+  --user-data-dir "$OT_HOME/profiles/vscode/data" \
+  --extensions-dir "$OT_HOME/profiles/vscode/extensions" \
   "$@"

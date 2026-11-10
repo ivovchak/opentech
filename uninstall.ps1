@@ -25,16 +25,18 @@ if ($parts -contains $BinDir) {
     Write-Host "[=] $BinDir is not in PATH"
 }
 
-# 2. Desktop shortcut
-$lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'VS Code OpenTech.lnk'
-if (Test-Path $lnkPath) {
-    Remove-Item -Force $lnkPath
-    Write-Host "[-] Removed the VS Code OpenTech desktop shortcut"
+# 2. Desktop shortcuts
+foreach ($name in @('VS Code OpenTech', 'Claude OpenTech')) {
+    $lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) "$name.lnk"
+    if (Test-Path $lnkPath) {
+        Remove-Item -Force $lnkPath
+        Write-Host "[-] Removed the $name desktop shortcut"
+    }
 }
 
 # 3. Folder with logins, settings, and this repository
 if (-not $Yes) {
-    Write-Warning "$OT contains the dedicated login (claude\) and ot-code settings (vscode\)."
+    Write-Warning "$OT contains the dedicated logins and settings (profiles\)."
     $answer = Read-Host "Delete $OT completely? [y/N]"
     $Yes = $answer -match '^[yY]'
 }
@@ -44,7 +46,7 @@ if ($Yes) {
         Remove-Item -Recurse -Force $OT
         Write-Host "[-] Removed $OT"
     } catch {
-        Write-Warning "Could not delete $OT completely. Close ot-code and ot-claude, then delete the folder manually."
+        Write-Warning "Could not delete $OT completely. Close ot-code, ot-claude and Claude OpenTech, then delete the folder manually."
     }
 } else {
     Write-Host "[=] Kept $OT (delete it manually if no longer needed)"

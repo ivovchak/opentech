@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Claude desktop app with the dedicated account.
+# A second copy of the same Claude.app that keeps its data in profiles/claude-desktop
+# (not ~/Library/Application Support/Claude), so it runs side by side with your personal Claude.
+# Its Code tab uses the same Claude Code profile as ot-claude (profiles/claude-code).
+set -e
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+APP=""
+for a in "/Applications/Claude.app" "$HOME/Applications/Claude.app"; do
+  if [ -x "$a/Contents/MacOS/Claude" ]; then APP="$a"; break; fi
+done
+if [ -z "$APP" ]; then
+  echo "Claude desktop app not found. Install it from https://claude.ai/download" >&2
+  exit 1
+fi
+
+export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code"
+unset ANTHROPIC_API_KEY
+export OT_HOME
+DATA="$OT_HOME/profiles/claude-desktop"
+mkdir -p "$DATA"
+
+# With its own data folder Claude does not stop a second copy, and two copies on one folder
+# can corrupt it. If it is already running, bring it to the front instead.
+PID="$(pgrep -f -- "MacOS/Claude --user-data-dir=$DATA" | head -1 || true)"
+if [ -n "$PID" ]; then
+  osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $PID) to true" >/dev/null 2>&1 || true
+  exit 0
+fi
+
+nohup "$APP/Contents/MacOS/Claude" --user-data-dir="$DATA" "$@" >/dev/null 2>&1 &

@@ -12,5 +12,5 @@ if not defined ANTHROPIC_API_KEY (
   exit /b 1
 )
 
-set "CLAUDE_CONFIG_DIR=%OT_HOME%\claude-api"
+set "CLAUDE_CONFIG_DIR=%OT_HOME%\profiles\claude-code-api"
 claude %*

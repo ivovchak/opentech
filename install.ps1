@@ -4,21 +4,44 @@
 
 $ErrorActionPreference = 'Stop'
 $OT        = $PSScriptRoot
-$ClaudeDir = Join-Path $OT 'claude'
-$ClaudeApiDir = Join-Path $OT 'claude-api'
-$DataDir   = Join-Path $OT 'vscode\data'
-$ExtDir    = Join-Path $OT 'vscode\extensions'
-$BinDir    = Join-Path $OT 'bin'
+$P            = Join-Path $OT 'profiles'
+$ClaudeDir    = Join-Path $P 'claude-code'
+$ClaudeApiDir = Join-Path $P 'claude-code-api'
+$DesktopDir   = Join-Path $P 'claude-desktop'
+$DataDir      = Join-Path $P 'vscode\data'
+$ExtDir       = Join-Path $P 'vscode\extensions'
+$BinDir       = Join-Path $OT 'bin'
+$Version      = if (Test-Path (Join-Path $OT 'VERSION')) { (Get-Content (Join-Path $OT 'VERSION') -TotalCount 1).Trim() } else { 'unknown' }
 
 Write-Host ""
-Write-Host "Installing the isolated profile to $OT" -ForegroundColor Cyan
+Write-Host "Installing OpenTech $Version to $OT" -ForegroundColor Cyan
 Write-Host ""
+
+# 0. Migrations: one-time changes to existing data (see migrations\ and CHANGELOG.md).
+# Applied migration names are recorded in profiles\.migrations so each runs only once.
+New-Item -ItemType Directory -Force -Path $P | Out-Null
+$applied = Join-Path $P '.migrations'
+if (-not (Test-Path $applied)) { New-Item -ItemType File -Path $applied | Out-Null }
+$done = @(Get-Content $applied)
+foreach ($m in Get-ChildItem (Join-Path $OT 'migrations') -Filter '[0-9]*.ps1' | Sort-Object Name) {
+    $name = $m.BaseName
+    if ($done -contains $name) { continue }
+    Write-Host "[..] Migration $name"
+    try { & $m.FullName -OT $OT }
+    catch {
+        Write-Warning "Migration $name failed: $($_.Exception.Message)"
+        Write-Warning "Fix the problem above and run install.cmd again."
+        exit 1
+    }
+    Add-Content -Path $applied -Value $name
+    Write-Host "[+] Migration $name applied"
+}
 
 # 1. Directories
-foreach ($d in @($ClaudeDir, $ClaudeApiDir, (Join-Path $DataDir 'User'), $ExtDir)) {
+foreach ($d in @($ClaudeDir, $ClaudeApiDir, $DesktopDir, (Join-Path $DataDir 'User'), $ExtDir)) {
     New-Item -ItemType Directory -Force -Path $d | Out-Null
 }
-Write-Host "[+] claude\, claude-api\ and vscode\ directories are ready"
+Write-Host "[+] profiles\ (claude-code, claude-code-api, claude-desktop, vscode) is ready"
 
 # 2. Add bin to the user PATH (so the ot-claude command works)
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -71,6 +94,27 @@ if ($VsDir) { $lnk.IconLocation = (Join-Path $VsDir 'Code.exe') + ',0' }
 $lnk.Save()
 Write-Host "[+] VS Code OpenTech shortcut created on the desktop"
 
+# 5b. Claude desktop shortcut (a second Claude with the dedicated account)
+$ClaudeExe = @(
+    (Join-Path $env:LOCALAPPDATA 'AnthropicClaude\claude.exe'),
+    (Join-Path $env:LOCALAPPDATA 'Programs\Claude\Claude.exe'),
+    (Join-Path $env:ProgramFiles 'Claude\Claude.exe')
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($ClaudeExe) {
+    $lnk = $shell.CreateShortcut((Join-Path $desktop 'Claude OpenTech.lnk'))
+    $lnk.TargetPath       = Join-Path $BinDir 'ot-claude-desktop.cmd'
+    $lnk.WorkingDirectory = $OT
+    $lnk.WindowStyle      = 7
+    $lnk.Description      = 'Claude desktop with the dedicated account'
+    $lnk.IconLocation     = "$ClaudeExe,0"
+    $lnk.Save()
+    Write-Host "[+] Claude OpenTech shortcut created on the desktop"
+} elseif (Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue) {
+    Write-Warning "Claude is installed from the Microsoft Store; that version cannot use a separate data folder. Install it from https://claude.ai/download to get Claude OpenTech."
+} else {
+    Write-Warning "Claude desktop app not found; install it from https://claude.ai/download and run install.cmd again."
+}
+
 # 6. Claude Code CLI
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
     Write-Warning "Claude Code CLI not found. Install it with: irm https://claude.ai/install.ps1 | iex"
@@ -95,4 +139,6 @@ Write-Host "Done! Next steps:" -ForegroundColor Green
 Write-Host "  1. Open a NEW terminal and run: ot-claude"
 Write-Host "  2. Sign in with the dedicated account and verify with /status"
 Write-Host "  3. Open dedicated projects only through the VS Code OpenTech shortcut"
+Write-Host "  4. Claude desktop with the dedicated account: the Claude OpenTech shortcut"
+Write-Host "  Update later with: ot-update"
 Write-Host ""
