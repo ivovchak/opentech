@@ -26,7 +26,7 @@ if ($parts -contains $BinDir) {
 }
 
 # 2. Desktop shortcuts
-foreach ($name in @('VS Code OpenTech', 'Claude OpenTech')) {
+foreach ($name in @('VS Code OpenTech', 'OT Claude', 'Claude OpenTech')) {
     $lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) "$name.lnk"
     if (Test-Path $lnkPath) {
         Remove-Item -Force $lnkPath
@@ -46,7 +46,7 @@ if ($Yes) {
         Remove-Item -Recurse -Force $OT
         Write-Host "[-] Removed $OT"
     } catch {
-        Write-Warning "Could not delete $OT completely. Close ot-code, ot-claude and Claude OpenTech, then delete the folder manually."
+        Write-Warning "Could not delete $OT completely. Close ot-code, ot-claude and OT Claude, then delete the folder manually."
     }
 } else {
     Write-Host "[=] Kept $OT (delete it manually if no longer needed)"

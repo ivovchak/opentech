@@ -16,7 +16,7 @@ rem With its own data folder Claude does not stop a second copy, and two copies 
 rem can corrupt it. If it is already running, do not start another one.
 powershell -NoProfile -Command "$d = $env:DATA; if (Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'claude.exe' -and $_.CommandLine -and $_.CommandLine.Contains($d) }) { exit 1 }"
 if errorlevel 1 (
-  echo Claude OpenTech is already running.
+  echo OT Claude is already running.
   exit /b 0
 )
 start "" "%CLAUDE_EXE%" --user-data-dir="%DATA%" %*

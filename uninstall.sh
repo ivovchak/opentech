@@ -29,7 +29,7 @@ done
 
 # 2. Launch shortcuts
 case "$(uname -s)" in
-  Darwin) SHORTCUTS=("$HOME/Applications/VS Code OpenTech.app" "$HOME/Applications/Claude OpenTech.app") ;;
+  Darwin) SHORTCUTS=("$HOME/Applications/VS Code OpenTech.app" "$HOME/Applications/OT Claude.app" "$HOME/Applications/Claude OpenTech.app") ;;
   Linux)  SHORTCUTS=("$HOME/.local/share/applications/ot-code.desktop") ;;
   *)      SHORTCUTS=() ;;
 esac
