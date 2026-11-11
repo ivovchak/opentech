@@ -34,7 +34,11 @@ done
 # 1. Directories and permissions
 mkdir -p "$P/claude-code" "$P/claude-code-api" "$P/claude-desktop" "$P/vscode/data/User" "$P/vscode/extensions"
 chmod 700 "$P"
-chmod +x "$BIN"/ot-* "$OT_HOME"/migrations/*.sh
+for f in "$BIN"/ot-* "$OT_HOME"/migrations/*.sh; do
+  case "$f" in *.cmd|*.ps1) ;; *) chmod +x "$f" ;; esac  # .cmd/.ps1 stay 644 as in git
+done
+# Mode-only changes must not block `git pull` in ot-update
+git -C "$OT_HOME" config core.fileMode false 2>/dev/null || true
 echo "[+] profiles/ (claude-code, claude-code-api, claude-desktop, vscode) is ready"
 [ -f "$OT_HOME/anthropic-api-key" ] && chmod 600 "$OT_HOME/anthropic-api-key"
 
