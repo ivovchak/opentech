@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# ot: Claude profiles, each with its own account (Claude Code, a Claude desktop copy, a VS Code instance).
+# Run `ot help`. Profiles are described in lib/profile.sh.
+set -euo pipefail
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+export OT_HOME
+. "$OT_HOME/lib/claude.sh"
+. "$OT_HOME/lib/profile.sh"
+
+die() { printf '%s\n' "$*" >&2; exit 1; }
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ot claude list              show profiles, their accounts and which desktop copies are running
+  ot claude add NAME          create a profile (on macOS also ~/Applications/OT Claude NAME.app)
+  ot claude rm NAME [--yes]   delete a profile with its login, settings and chats
+  ot claude [NAME] [ARGS]     Claude Code (terminal) with that profile
+  ot claude [NAME] --app      Claude desktop app with that profile (the OT Claude NAME shortcut)
+  ot vscode [NAME] [ARGS]     VS Code with that profile's Claude login (VS Code OpenTech NAME)
+
+NAME: lowercase letters, digits and dashes; without NAME the default profile
+(ot-claude, OT Claude, ot-vscode / ot-code).
+The product comes first (ot claude ...), so other AI tools can get their own `ot TOOL ...` later.
+EOF
+}
+
+# need_profile NAME: fail unless NAME is an existing profile
+need_profile() {
+  ot_profile_exists "$1" && return 0
+  die "No profile '$1'. See: ot claude list; create it with: ot claude add $1"
+}
+
+cmd_list() {
+  local n code data pid desktop account login
+  printf '%-20s %-9s %-11s %s\n' PROFILE DESKTOP LOGIN ACCOUNT
+  for n in $(ot_profiles); do
+    code="$(ot_code_dir "$n")"; data="$(ot_desktop_dir "$n")"
+    pid="$(ot_desktop_pid "$data")"
+    if [ -n "$pid" ]; then desktop=running; else desktop=-; fi
+    login=-
+    if [ "$(uname -s)" = Darwin ] && command -v security >/dev/null 2>&1; then
+      if security find-generic-password -a "$USER" -s "$(ot_keychain_service "$code")" >/dev/null 2>&1; then
+        login=signed-in
+      else
+        login=signed-out
+      fi
+    fi
+    account="$(ot_account "$code")"
+    printf '%-20s %-9s %-11s %s\n' "$n" "$desktop" "$login" "${account:--}"
+  done
+}
+
+cmd_add() {
+  local n="${1:-}"
+  [ -n "$n" ] || die "Usage: ot claude add NAME"
+  ot_valid_name "$n" || die "Invalid name '$n': use lowercase letters, digits and dashes (up to 24), e.g. client-x"
+  ot_reserved_name "$n" && die "'$n' is reserved; pick another name"
+  [ -e "$(ot_code_dir "$n")" ] && die "Profile '$n' already exists"
+  mkdir -p "$(ot_code_dir "$n")" "$(ot_desktop_dir "$n")"
+  chmod 700 "$OT_HOME/profiles" "$(ot_code_dir "$n")" "$(ot_desktop_dir "$n")"
+  echo "[+] Profile $n: profiles/claude-code-$n, profiles/claude-desktop-$n"
+  if [ "$(uname -s)" = Darwin ]; then
+    local rc=0
+    ot_make_desktop_shortcut "$n" || rc=$?
+    case "$rc" in
+      0) echo "[+] $(ot_app_name "$n") app created in ~/Applications" ;;
+      2) echo "[!] Claude desktop app not found; Claude Code works, the desktop copy needs https://claude.ai/download" ;;
+      *) echo "[!] Could not create the shortcut; launch with: ot claude $n --app" ;;
+    esac
+    rc=0
+    ot_make_vscode_shortcut "$n" || rc=$?
+    case "$rc" in
+      0) echo "[+] $(ot_vscode_app_name "$n") app created in ~/Applications" ;;
+      2) ;;  # no VS Code: nothing to make
+      *) echo "[!] Could not create the VS Code shortcut; launch with: ot vscode $n" ;;
+    esac
+  fi
+  echo
+  echo "Next: sign in with this profile's account"
+  echo "  ot claude $n          (Claude Code; check /status)"
+  [ "$(uname -s)" = Darwin ] && echo "  ot claude $n --app    (desktop app; quit other Claude windows while signing in)"
+  echo "  ot vscode $n          (VS Code with this login; the first start installs the Claude extension)"
+  return 0
+}
+
+cmd_rm() {
+  local n="" yes=0 a
+  for a in "$@"; do
+    case "$a" in --yes|-y) yes=1 ;; *) [ -z "$n" ] && n="$a" || die "Usage: ot claude rm NAME [--yes]" ;; esac
+  done
+  [ -n "$n" ] || die "Usage: ot claude rm NAME [--yes]"
+  [ "$n" = default ] && die "The default profile is removed only by uninstall.sh"
+  need_profile "$n"
+  local code data
+  code="$(ot_code_dir "$n")"; data="$(ot_desktop_dir "$n")"
+  [ -n "$(ot_desktop_pid "$data")" ] && die "$(ot_app_name "$n") is running; quit it first"
+  if [ "$yes" -eq 0 ]; then
+    [ -t 0 ] || die "Pass --yes to delete profile '$n' without asking"
+    printf '\033[33m[!] %s\033[0m\n' "This deletes the login, settings, chats and session history of profile '$n'."
+    read -r -p "Delete profile '$n'? [y/N] " a
+    case "$a" in [yY]*) ;; *) echo "[=] Kept profile $n"; return 0 ;; esac
+  fi
+  rm -rf "$code" "$data" "$(ot_vscode_dir "$n")"
+  echo "[-] Removed profiles/claude-code-$n, profiles/claude-desktop-$n and profiles/vscode-$n"
+  if [ "$(uname -s)" = Darwin ]; then
+    local app
+    for app in "$HOME/Applications/$(ot_app_name "$n").app" "$HOME/Applications/$(ot_vscode_app_name "$n").app"; do
+      if [ -e "$app" ]; then rm -rf "$app"; echo "[-] Removed $app"; fi
+    done
+    if security delete-generic-password -a "$USER" -s "$(ot_keychain_service "$code")" >/dev/null 2>&1; then
+      echo "[-] Removed the Claude Code login from the Keychain"
+    fi
+  fi
+}
+
+# cmd_cli NAME ARGS: Claude Code with that profile's config folder (subscription, never the API key)
+cmd_cli() {
+  local n="$1"; shift
+  need_profile "$n"
+  export CLAUDE_CONFIG_DIR
+  CLAUDE_CONFIG_DIR="$(ot_code_dir "$n")"
+  unset ANTHROPIC_API_KEY
+  local claude
+  claude="$(ot_claude_bin)" || die "Claude Code CLI not found. Install it with: curl -fsSL https://claude.ai/install.sh | bash"
+  # Blue "OpenTech" badge with the profile name in the status line (see bin/ot-statusline)
+  exec "$claude" --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"
+}
+
+# cmd_desktop NAME ARGS: a copy of Claude.app with that profile's data folder.
+# Its Code tab uses the profile's Claude Code folder.
+cmd_desktop() {
+  local n="$1"; shift
+  need_profile "$n"
+  local app data pid
+  app="$(ot_find_claude_app)" || die "Claude desktop app not found. Install it from https://claude.ai/download"
+  export CLAUDE_CONFIG_DIR
+  CLAUDE_CONFIG_DIR="$(ot_code_dir "$n")"
+  unset ANTHROPIC_API_KEY
+  data="$(ot_desktop_dir "$n")"
+  mkdir -p "$data"
+  # With its own data folder Claude does not stop a second copy, and two copies on one folder
+  # can corrupt it. If it is already running, bring it to the front instead.
+  pid="$(ot_desktop_pid "$data")"
+  if [ -n "$pid" ]; then
+    osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $pid) to true" >/dev/null 2>&1 || true
+    exit 0
+  fi
+  nohup "$app/Contents/MacOS/Claude" --user-data-dir="$data" "$@" >/dev/null 2>&1 &
+}
+
+# cmd_vscode NAME ARGS: VS Code with its own settings and extensions (profiles/vscode[-NAME]) and the
+# profile's Claude Code login, for the Claude extension and the built-in terminal
+cmd_vscode() {
+  local n="$1"; shift
+  need_profile "$n"
+  local code dir a manage=0
+  code="$(ot_find_code)" || die "VS Code not found. Install it from https://code.visualstudio.com"
+  export CLAUDE_CONFIG_DIR
+  CLAUDE_CONFIG_DIR="$(ot_code_dir "$n")"
+  unset ANTHROPIC_API_KEY
+  dir="$(ot_vscode_dir "$n")"
+  ot_vscode_init "$n"
+  for a in "$@"; do case "$a" in --install-extension|--uninstall-extension|--list-extensions) manage=1 ;; esac; done
+  if [ "$manage" -eq 0 ] && ! ot_vscode_has_claude "$n"; then
+    echo "[..] Installing the Claude Code extension in VS Code for profile $n"
+    "$code" --user-data-dir "$dir/data" --extensions-dir "$dir/extensions" \
+      --install-extension anthropic.claude-code >/dev/null || echo "[!] Could not install the Claude Code extension" >&2
+  fi
+  exec "$code" --user-data-dir "$dir/data" --extensions-dir "$dir/extensions" "$@"
+}
+
+# run_profile NAME ARGS: --app right after the profile name opens the desktop app, otherwise Claude Code
+run_profile() {
+  local n="$1"; shift
+  if [ "${1:-}" = --app ]; then shift; cmd_desktop "$n" "$@"; else cmd_cli "$n" "$@"; fi
+}
+
+# After `claude` / `vscode`, the first argument is a profile name unless it is missing or an option
+case "${1:-help}" in
+  claude)
+    shift
+    case "${1:-}" in
+      list|ls) cmd_list ;;
+      add) shift; cmd_add "$@" ;;
+      rm|remove) shift; cmd_rm "$@" ;;
+      ""|-*) run_profile default "$@" ;;
+      *) n="$1"; shift; run_profile "$n" "$@" ;;
+    esac
+    ;;
+  vscode)
+    shift
+    case "${1:-}" in
+      ""|-*) cmd_vscode default "$@" ;;
+      *) n="$1"; shift; cmd_vscode "$n" "$@" ;;
+    esac
+    ;;
+  help|-h|--help) usage ;;
+  *) usage >&2; exit 1 ;;
+esac

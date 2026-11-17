@@ -4,7 +4,7 @@
 #   --yes  also delete the folder with logins and settings without asking
 set -euo pipefail
 
-OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 warn() { printf '\033[33m[!] %s\033[0m\n' "$*"; }
 
 YES=0
@@ -29,7 +29,12 @@ done
 
 # 2. Launch shortcuts
 case "$(uname -s)" in
-  Darwin) SHORTCUTS=("$HOME/Applications/VS Code OpenTech.app" "$HOME/Applications/OT Claude.app" "$HOME/Applications/Claude OpenTech.app") ;;
+  Darwin)
+    SHORTCUTS=("$HOME/Applications/VS Code OpenTech.app" "$HOME/Applications/OT Claude.app" "$HOME/Applications/Claude OpenTech.app")
+    for s in "$HOME/Applications/OT Claude "*.app "$HOME/Applications/VS Code OpenTech "*.app; do  # ot claude add
+      [ -e "$s" ] && SHORTCUTS+=("$s")
+    done
+    ;;
   Linux)  SHORTCUTS=("$HOME/.local/share/applications/ot-code.desktop") ;;
   *)      SHORTCUTS=() ;;
 esac

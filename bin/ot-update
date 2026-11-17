@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 # Update OpenTech: pull the latest version and re-run install.sh (which applies new migrations).
 set -euo pipefail
-OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 old="$(cat "$OT_HOME/VERSION" 2>/dev/null || echo unknown)"
-git -C "$OT_HOME" pull --ff-only
+g() { git -C "$OT_HOME" "$@"; }
+
+if ! g pull --ff-only; then
+  # The published history was rewritten (same files, new commit ids), so a fast-forward is not
+  # possible. Move to it only when that loses nothing: no local edits to tracked files, and the
+  # files of the current commit are part of the new history. profiles/ is git-ignored and is kept.
+  if g diff --quiet HEAD && g log '@{upstream}' --format=%T | grep -qxF "$(g rev-parse 'HEAD^{tree}')"; then
+    echo "[..] The OpenTech history was rewritten on GitHub; moving to it (your profiles/ are kept)"
+    g reset --hard '@{upstream}'
+  else
+    printf '\033[33m[!] %s\033[0m\n' "Could not update: this copy has local changes. Keep what you need, then run:" \
+      "    cd \"$OT_HOME\" && git fetch && git reset --hard @{upstream} && ot-update" >&2
+    exit 1
+  fi
+fi
+
 new="$(cat "$OT_HOME/VERSION" 2>/dev/null || echo unknown)"
 if [ "$old" = "$new" ]; then
   echo "OpenTech $new is up to date"

@@ -13,4 +13,7 @@ if not defined ANTHROPIC_API_KEY (
 )
 
 set "CLAUDE_CONFIG_DIR=%OT_HOME%\profiles\claude-code-api"
-claude %*
+rem The native install (kept current by ot-update) wins over whatever comes first in PATH
+set "CLAUDE=claude"
+if exist "%USERPROFILE%\.local\bin\claude.exe" set "CLAUDE=%USERPROFILE%\.local\bin\claude.exe"
+"%CLAUDE%" %*

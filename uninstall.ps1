@@ -25,9 +25,12 @@ if ($parts -contains $BinDir) {
     Write-Host "[=] $BinDir is not in PATH"
 }
 
-# 2. Desktop shortcuts
-foreach ($name in @('VS Code OpenTech', 'OT Claude', 'Claude OpenTech')) {
-    $lnkPath = Join-Path ([Environment]::GetFolderPath('Desktop')) "$name.lnk"
+# 2. Desktop shortcuts (OT Claude NAME: profiles made by `ot claude add`)
+$desktop = [Environment]::GetFolderPath('Desktop')
+$names = @('VS Code OpenTech', 'OT Claude', 'Claude OpenTech') +
+    @(Get-ChildItem -Path $desktop -Filter 'OT Claude *.lnk' -ErrorAction SilentlyContinue | ForEach-Object { $_.BaseName })
+foreach ($name in $names) {
+    $lnkPath = Join-Path $desktop "$name.lnk"
     if (Test-Path $lnkPath) {
         Remove-Item -Force $lnkPath
         Write-Host "[-] Removed the $name desktop shortcut"

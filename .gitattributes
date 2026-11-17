@@ -1,7 +1,9 @@
 * text=auto
 *.sh text eol=lf
+bin/ot text eol=lf
 bin/ot-claude text eol=lf
 bin/ot-code text eol=lf
+bin/ot-vscode text eol=lf
 bin/ot-claude-api text eol=lf
 bin/ot-statusline text eol=lf
 bin/ot-security-check text eol=lf

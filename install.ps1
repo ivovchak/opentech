@@ -86,7 +86,7 @@ $desktop = [Environment]::GetFolderPath('Desktop')
 $lnkPath = Join-Path $desktop 'VS Code OpenTech.lnk'
 $shell   = New-Object -ComObject WScript.Shell
 $lnk     = $shell.CreateShortcut($lnkPath)
-$lnk.TargetPath       = Join-Path $BinDir 'ot-code.cmd'
+$lnk.TargetPath       = Join-Path $BinDir 'ot-vscode.cmd'
 $lnk.WorkingDirectory = $OT
 $lnk.WindowStyle      = 7
 $lnk.Description      = 'VS Code with the dedicated Claude account'
@@ -116,9 +116,16 @@ if ($ClaudeExe) {
     Write-Warning "Claude desktop app not found; install it from https://claude.ai/download and run install.cmd again."
 }
 
-# 6. Claude Code CLI
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+# 6. Claude Code CLI: update it (ot-update runs this script), so new commands such as /goal are there.
+# The native install wins over whatever comes first in PATH, as in ot-claude.cmd.
+$ClaudeExe = Join-Path $env:USERPROFILE ".local\bin\claude.exe"
+if (-not (Test-Path $ClaudeExe)) { $ClaudeExe = (Get-Command claude -ErrorAction SilentlyContinue).Source }
+if (-not $ClaudeExe) {
     Write-Warning "Claude Code CLI not found. Install it with: irm https://claude.ai/install.ps1 | iex"
+} else {
+    Write-Host "[..] Updating Claude Code ($ClaudeExe)"
+    & $ClaudeExe update
+    Write-Host "[+] Claude Code $((& $ClaudeExe --version) -split ' ' | Select-Object -First 1)"
 }
 
 # 7. Security checks (see security\README.md)

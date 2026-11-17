@@ -4,16 +4,17 @@ This repository configures a separate Claude account so it does not mix with you
 
 - `ot-claude` — Claude Code using the dedicated account (the regular `claude` command remains personal)
 - **OT Claude** (`ot-claude-desktop`) — a second Claude desktop app with the dedicated account, running alongside your personal Claude (macOS and Windows)
-- `ot-code` — a separate VS Code instance with its own settings, extensions, and login (your regular VS Code is unaffected)
+- `ot-vscode` (old name `ot-code`, still works) — a separate VS Code instance with its own settings, extensions, and login (your regular VS Code is unaffected)
 
 All dedicated logins and settings are stored in `~/.opentech/profiles/`; your personal ones stay in the standard places (`~/.claude`, the regular Claude app and VS Code).
 
 | Folder | Used by |
 | --- | --- |
-| `profiles/claude-code/` | `ot-claude`, `ot-code`, and the Code tab of OT Claude |
+| `profiles/claude-code/` | `ot-claude`, `ot-vscode`, and the Code tab of OT Claude |
 | `profiles/claude-code-api/` | `ot-claude-api` |
 | `profiles/claude-desktop/` | OT Claude (chats, desktop app settings) |
-| `profiles/vscode/` | `ot-code` (settings and extensions) |
+| `profiles/vscode/` | `ot-vscode` / `ot-code` (settings and extensions) |
+| `profiles/claude-code-NAME/`, `profiles/claude-desktop-NAME/`, `profiles/vscode-NAME/` | extra [profiles](#profiles-more-accounts) made with `ot claude add NAME` |
 
 ## Requirements
 
@@ -45,7 +46,7 @@ The installation script:
 
 1. applies new [migrations](#versions-and-migrations) to existing data;
 2. creates the `profiles/` directories;
-3. adds `~/.opentech/bin` to PATH (the `ot-claude`, `ot-code`, `ot-claude-desktop` and `ot-update` commands);
+3. adds `~/.opentech/bin` to PATH (the `ot`, `ot-claude`, `ot-vscode` (`ot-code`), `ot-claude-desktop` and `ot-update` commands);
 4. creates dedicated VS Code settings (a blue title bar and status bar, with `[OpenTech]` in the window title);
 5. installs the Claude Code extension in the dedicated VS Code instance;
 6. creates **VS Code OpenTech** and **OT Claude** shortcuts (Windows: desktop, macOS: `~/Applications`, Linux: applications menu, VS Code only).
@@ -64,13 +65,14 @@ You can run the script again; it does not overwrite existing settings.
 
 | What | How |
 | --- | --- |
-| Dedicated projects | the **VS Code OpenTech** shortcut or `ot-code <folder>` |
+| Dedicated projects | the **VS Code OpenTech** shortcut or `ot-vscode <folder>` (`ot-code` also works) |
 | Dedicated Claude in the terminal | `ot-claude` |
 | Dedicated Claude desktop app | the **OT Claude** shortcut or `ot-claude-desktop` |
 | Claude billed to the API key | `ot-claude-api` |
+| Another dedicated account | `ot claude add NAME`, then `ot claude NAME` / `ot claude NAME --app` / `ot vscode NAME` ([Profiles](#profiles-more-accounts)) |
 | Personal projects | regular VS Code and `claude` |
 
-Open dedicated projects **only** through `ot-code`; the regular VS Code shortcut uses your personal account.
+Open dedicated projects **only** through `ot-vscode`; the regular VS Code shortcut uses your personal account.
 
 ## Claude desktop (OT Claude)
 
@@ -81,6 +83,47 @@ OT Claude is the same Claude app you already have, started with its own data fol
 - In the Dock and the taskbar both copies have the same Claude icon; check the account in the app settings.
 - Clicking the shortcut again brings the running OT Claude to the front instead of starting a second copy (two copies on one data folder could damage it).
 - It relies on Claude's `--user-data-dir` start option, which is not officially documented. If a Claude update stops supporting it, OT Claude will open with your personal data; tell the maintainer.
+
+## Profiles (more accounts)
+
+The dedicated account above is the `default` profile. To use more accounts side by side (for example
+one per client), create a profile for each:
+
+```bash
+ot claude add client-x      # profiles/claude-code-client-x + profiles/claude-desktop-client-x
+ot claude client-x          # Claude Code with it; sign in and check /status
+ot claude client-x --app    # Claude desktop app with it (or the OT Claude client-x shortcut)
+ot vscode client-x .        # VS Code with its login (or the VS Code OpenTech client-x shortcut)
+ot claude list              # every profile, its account, and whether its desktop copy is running
+ot claude rm client-x       # delete it with its login, settings and chats
+```
+
+| Command | What it does |
+| --- | --- |
+| `ot claude list` | profiles, signed-in account, `running` for open desktop copies |
+| `ot claude add NAME` | creates the profile folders and **OT Claude NAME** and (macOS) **VS Code OpenTech NAME** shortcuts (macOS: `~/Applications`, Windows: desktop) |
+| `ot claude [NAME] [ARGS]` | Claude Code with that profile; without NAME the default one (same as `ot-claude`) |
+| `ot claude [NAME] --app` | Claude desktop app with that profile; without NAME OT Claude (same as `ot-claude-desktop`) |
+| `ot vscode [NAME] [ARGS]` | VS Code with that profile's login, settings and extensions (`profiles/vscode-NAME`, made on first start with the Claude extension); without NAME the default one (same as `ot-vscode`) |
+| `ot claude rm NAME [--yes]` | deletes the profile, its VS Code folder, its shortcuts and (macOS) its Keychain login; quit its desktop copy first |
+
+- NAME is lowercase letters, digits and dashes; `default`, `api` and the subcommand names are reserved.
+- Each profile has its own login. Sign-in links (`claude://`) go to the Claude window that was opened
+  first, so quit the other Claude windows while signing in to a new profile, or use the email code.
+- The product comes first (`ot claude ...`), so other AI tools can later get their own `ot TOOL ...`
+  commands and profiles.
+- The status line shows `OpenTech NAME`, and on macOS the shortcut icon has the name on its badge.
+- `ot-claude-api` stays on the API key; it is not a profile.
+
+### How isolated profiles are
+
+Each profile has its own Claude login (Keychain entry per folder), settings, permissions, plugins,
+MCP servers, memory, chat and session history, and its own VS Code settings and extensions.
+They are **not a sandbox**: all profiles run as the same macOS / Windows user, so they share your
+files (`~/.ssh`, `~/.gitconfig`, `gh` login, `.env` files in projects), the project's own
+`.claude/settings.json` and `CLAUDE.md`, and the Claude app itself. A plugin or MCP server added to
+one profile can read anything your user can. When a client needs its code and secrets kept apart,
+use a separate OS user, a virtual machine or a dev container for that client.
 
 ## API key mode
 
@@ -135,6 +178,25 @@ ot-update
 ```
 
 It pulls the latest version and runs the install script again, which applies new migrations. Versions before 2.0.0 do not have `ot-update` yet; update them once with `cd ~/.opentech && git pull && bash install.sh` (Windows: `git pull`, then `install.cmd`). Close `ot-code`, `ot-claude` and OT Claude first. Your logins and settings in `profiles/` are kept.
+
+### If `ot-update` fails: *Not possible to fast-forward*
+
+The project history on GitHub was rewritten (in 2.3.0: the files are the same, the commit ids
+changed). Close `ot-vscode`, `ot-claude` and OT Claude, then run once:
+
+```bash
+cd ~/.opentech && git fetch && git reset --hard origin/main && ot-update
+```
+
+Windows (PowerShell):
+
+```powershell
+cd $HOME\.opentech; git fetch; git reset --hard origin/main; bin\ot-update.cmd
+```
+
+`git reset --hard` discards only edits made to the project's own files. Logins and settings in
+`profiles/` and the `anthropic-api-key` file are git-ignored and are kept. From 2.3.0 on, `ot-update`
+does this step by itself when nothing local would be lost. See [CHANGELOG.md](CHANGELOG.md#230).
 
 ## Versions and migrations
 

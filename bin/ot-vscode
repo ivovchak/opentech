@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# VS Code with the dedicated Claude account (VS Code OpenTech): the default profile of `ot vscode`.
+# Its own settings and extensions in profiles/vscode, and the Claude Code login of ot-claude.
+# Same as `ot vscode default ARGS`; see bin/ot. ot-code is the old name and does the same.
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/ot" vscode default "$@"

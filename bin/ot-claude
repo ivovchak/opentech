@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Claude Code using the separate account (subscription)
-OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code"
-unset ANTHROPIC_API_KEY
-export OT_HOME
-# Blue "OpenTech" badge in the status line (see bin/ot-statusline)
-exec claude --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"
+# Claude Code using the separate account (subscription): the default profile of `ot claude`.
+# Same as `ot claude default ARGS`; see bin/ot.
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/ot" claude default "$@"

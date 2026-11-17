@@ -6,9 +6,11 @@
 # Claude Code passes session info as JSON on stdin; model and folder are shown if jq is installed.
 input="$(cat)"
 
+#   blue   " OpenTech NAME " - ot claude NAME (other profiles)
 case "$(basename "${CLAUDE_CONFIG_DIR:-}")" in
   claude-code-api) badge=' OpenTech API '; color='1;30;43' ;;
-  *)          badge=' OpenTech ';     color='1;97;44' ;;
+  claude-code-*)   badge=" OpenTech ${CLAUDE_CONFIG_DIR##*/claude-code-} "; color='1;97;44' ;;
+  *)               badge=' OpenTech ';     color='1;97;44' ;;
 esac
 
 info=""

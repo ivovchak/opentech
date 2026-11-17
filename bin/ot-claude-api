@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code billed to the Anthropic API key (pay per token) instead of the subscription
 # The key is read from $OT_HOME/anthropic-api-key (git-ignored) or from OT_ANTHROPIC_API_KEY
-OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 KEY_FILE="$OT_HOME/anthropic-api-key"
 
 KEY="${OT_ANTHROPIC_API_KEY:-}"
@@ -17,5 +17,7 @@ fi
 export CLAUDE_CONFIG_DIR="$OT_HOME/profiles/claude-code-api"
 export ANTHROPIC_API_KEY="$KEY"
 export OT_HOME
+. "$OT_HOME/lib/claude.sh"
+CLAUDE="$(ot_claude_bin)" || { echo "Claude Code CLI not found. Install it with: curl -fsSL https://claude.ai/install.sh | bash" >&2; exit 1; }
 # Yellow "OpenTech API" badge in the status line (see bin/ot-statusline)
-exec claude --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"
+exec "$CLAUDE" --settings '{"statusLine":{"type":"command","command":"\"$OT_HOME/bin/ot-statusline\""}}' "$@"

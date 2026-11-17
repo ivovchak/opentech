@@ -3,7 +3,7 @@
 # Run: bash install.sh
 set -euo pipefail
 
-OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 BIN="$OT_HOME/bin"
 warn() { printf '\033[33m[!] %s\033[0m\n' "$*"; }
 
@@ -34,7 +34,7 @@ done
 # 1. Directories and permissions
 mkdir -p "$P/claude-code" "$P/claude-code-api" "$P/claude-desktop" "$P/vscode/data/User" "$P/vscode/extensions"
 chmod 700 "$P"
-for f in "$BIN"/ot-* "$OT_HOME"/migrations/*.sh; do
+for f in "$BIN"/ot "$BIN"/ot-* "$OT_HOME"/migrations/*.sh; do
   case "$f" in *.cmd|*.ps1) ;; *) chmod +x "$f" ;; esac  # .cmd/.ps1 stay 644 as in git
 done
 # Mode-only changes must not block `git pull` in ot-update
@@ -70,44 +70,39 @@ fi
 
 # 4. Claude Code extension
 echo "[..] Installing the Claude Code extension in the dedicated VS Code instance"
-if "$BIN/ot-code" --install-extension anthropic.claude-code --force; then
+if "$BIN/ot-vscode" --install-extension anthropic.claude-code --force; then
   echo "[+] Extension installed"
 else
   warn "Could not install the extension (is VS Code installed?). Run install.sh again later."
 fi
 
-# 5. Launch shortcuts
-# make_app NAME COMMAND [ICON]: a small ~/Applications/NAME.app that runs COMMAND
-make_app() {
-  local app="$HOME/Applications/$1.app"
-  rm -rf "$app"
-  osacompile -o "$app" -e "do shell script quoted form of \"$2\" & \" > /dev/null 2>&1 &\"" 2>/dev/null || return 1
-  if [ -n "${3:-}" ] && [ -f "$3" ]; then
-    cp "$3" "$app/Contents/Resources/applet.icns"
-    codesign --force --sign - "$app" >/dev/null 2>&1 || true
-    touch "$app"
-  fi
-}
+# 5. Launch shortcuts (ot_make_app and ot_make_desktop_shortcut are in lib/profile.sh)
+. "$OT_HOME/lib/profile.sh"
 case "$(uname -s)" in
   Darwin)
-    mkdir -p "$HOME/Applications"
-    if make_app "VS Code OpenTech" "$BIN/ot-code"; then
-      echo "[+] VS Code OpenTech app created in ~/Applications"
-    else
-      warn "Could not create the shortcut; launch with: ot-code"
-    fi
-    rm -rf "$HOME/Applications/Claude OpenTech.app"  # old name (2.0.0)
-    CLAUDE_APP=""
-    for a in "/Applications/Claude.app" "$HOME/Applications/Claude.app"; do
-      [ -d "$a" ] && CLAUDE_APP="$a" && break
+    # VS Code OpenTech and one VS Code OpenTech NAME per profile: the VS Code icon with a blue badge
+    for name in $(ot_profiles); do
+      rc=0
+      ot_make_vscode_shortcut "$name" || rc=$?
+      case "$rc" in
+        0) echo "[+] $(ot_vscode_app_name "$name") app created in ~/Applications" ;;
+        2) warn "VS Code not found; install it from https://code.visualstudio.com and run install.sh again"; break ;;
+        *) warn "Could not create the $(ot_vscode_app_name "$name") shortcut; launch with: ot vscode $name" ;;
+      esac
     done
-    if [ -z "$CLAUDE_APP" ]; then
-      warn "Claude desktop app not found; install it from https://claude.ai/download and run install.sh again"
-    elif make_app "OT Claude" "$BIN/ot-claude-desktop" "$CLAUDE_APP/Contents/Resources/electron.icns"; then
-      echo "[+] OT Claude app created in ~/Applications"
-    else
-      warn "Could not create the shortcut; launch with: ot-claude-desktop"
-    fi
+    rm -rf "$HOME/Applications/Claude OpenTech.app"  # old name (2.0.0)
+    # OT Claude and one OT Claude NAME per profile (ot claude add): the Claude icon with a blue badge
+    # (templates/make-icon.swift, plain Claude icon if swift is missing). Rebuilt each run, so the
+    # icon follows Claude updates.
+    for name in $(ot_profiles); do
+      rc=0
+      ot_make_desktop_shortcut "$name" || rc=$?
+      case "$rc" in
+        0) echo "[+] $(ot_app_name "$name") app created in ~/Applications" ;;
+        2) warn "Claude desktop app not found; install it from https://claude.ai/download and run install.sh again"; break ;;
+        *) warn "Could not create the $(ot_app_name "$name") shortcut; launch with: ot claude $name --app" ;;
+      esac
+    done
     ;;
   Linux)
     APPS="$HOME/.local/share/applications"
@@ -117,7 +112,7 @@ case "$(uname -s)" in
 Type=Application
   Name=VS Code OpenTech
   Comment=VS Code with the dedicated Claude account
-Exec="$BIN/ot-code" %F
+Exec="$BIN/ot-vscode" %F
 Icon=vscode
 Terminal=false
 Categories=Development;IDE;
@@ -126,10 +121,9 @@ EOF
     ;;
 esac
 
-# 6. Claude Code CLI
-if ! command -v claude >/dev/null 2>&1; then
-  warn "Claude Code CLI not found. Install it with: curl -fsSL https://claude.ai/install.sh | bash"
-fi
+# 6. Claude Code CLI: update it (ot-update runs this script), so new commands such as /goal are there
+. "$OT_HOME/lib/claude.sh"
+ot_update_claude
 
 # 7. Security checks (see security/README.md)
 printf '\n\033[36mSecurity checks\033[0m\n'
@@ -140,7 +134,7 @@ if command -v node >/dev/null 2>&1; then node "$OT_HOME/security/check-node.js" 
 printf '\n\033[32mDone! Next steps:\033[0m\n'
 echo "  1. Open a NEW terminal and run: ot-claude"
 echo "  2. Sign in with the dedicated account and verify with /status"
-echo "  3. Open dedicated projects with the VS Code OpenTech shortcut or the ot-code command"
+echo "  3. Open dedicated projects with the VS Code OpenTech shortcut or the ot-vscode command (ot-code also works)"
 [ "$(uname -s)" = "Darwin" ] && echo "  4. Claude desktop with the dedicated account: OT Claude in ~/Applications"
 echo "  Update later with: ot-update"
 echo
